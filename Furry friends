@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Furry Friends Community</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: auto;
+    background: #f5f0ff;
+    color: #333;
+    padding: 1em;
+  }
+  header, footer {
+    background-color: #8e44ad;
+    color: white;
+    padding: 1em;
+    text-align: center;
+    border-radius: 8px;
+  }
+  nav {
+    margin: 1em 0;
+    text-align: center;
+  }
+  nav button {
+    background-color: #6c3483;
+    border: none;
+    color: white;
+    padding: 0.5em 1.2em;
+    margin: 0 0.4em;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  nav button:hover {
+    background-color: #8e44ad;
+  }
+  section {
+    display: none;
+    margin-top: 1em;
+  }
+  section.active {
+    display: block;
+  }
+  h2 {
+    border-bottom: 2px solid #6c3483;
+    padding-bottom: 0.3em;
+  }
+  /* Gallery */
+  #gallery-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin-top: 1em;
+  }
+  #gallery-list img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.15);
+  }
+  /* Comments */
+  #comments-list {
+    margin-top: 1em;
+  }
+  .comment {
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    padding: 0.5em;
+    margin-bottom: 0.8em;
+    background: #eee;
+  }
+  .comment strong {
+    color: #6c3483;
+  }
+  /* Form styling */
+  form label {
+    display: block;
+    margin-top: 0.5em;
+    font-weight: bold;
+  }
+  form input[type="text"], form textarea {
+    width: 100%;
+    padding: 0.4em;
+    margin-top: 0.2em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-family: inherit;
+  }
+  form button {
+    margin-top: 1em;
+    background-color: #6c3483;
+    color: white;
+    border: none;
+    padding: 0.6em 1.2em;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  form button:hover {
+    background-color: #8e44ad;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Furry Friends Community</h1>
+  <p>Welcome to your friendly furry corner of the internet!</p>
+</header>
+
+<nav>
+  <button data-target="info">Info</button>
+  <button data-target="gallery">Gallery</button>
+  <button data-target="comments">Comments</button>
+</nav>
+
+<!-- Info Section -->
+<section id="info" class="active">
+  <h2>About Our Community</h2>
+  <p>We are a warm and welcoming furry community who loves art, stories, meetups, and making new friends. Whether you’re a seasoned furry or just curious, join us to share and celebrate furry culture!</p>
+  <p>Events, fan art, and support — it’s all here.</p>
+</section>
+
+<!-- Gallery Section -->
+<section id="gallery">
+  <h2>Furry Gallery</h2>
+  <p>Upload pictures of your furry characters or favorite furry art to share with the community!</p>
+  <form id="upload-form">
+    <label for="image-upload">Choose image to upload:</label>
+    <input type="file" id="image-upload" accept="image/*" required />
+    <button type="submit">Upload Image</button>
+  </form>
+  <div id="gallery-list" aria-live="polite"></div>
+</section>
+
+<!-- Comments Section -->
+<section id="comments">
+  <h2>Community Comments</h2>
+  <form id="comment-form">
+    <label for="comment-name">Name:</label>
+    <input type="text" id="comment-name" placeholder="Your name" required />
+    <label for="comment-text">Comment:</label>
+    <textarea id="comment-text" rows="4" placeholder="Write your comment here..." required></textarea>
+    <button type="submit">Post Comment</button>
+  </form>
+  <div id="comments-list" aria-live="polite"></div>
+</section>
+
+<footer>
+  <p>&copy; 2025 Furry Friends Community</p>
+</footer>
+
+<script>
+// Navigation
+const buttons = document.querySelectorAll('nav button');
+const sections = document.querySelectorAll('section');
+
+buttons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.getAttribute('data-target');
+    sections.forEach(sec => {
+      sec.classList.toggle('active', sec.id === target);
+    });
+  });
+});
+
+// Gallery Upload Logic
+const uploadForm = document.getElementById('upload-form');
+const galleryList = document.getElementById('gallery-list');
+
+uploadForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const fileInput = document.getElementById('image-upload');
+  const file = fileInput.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const img = document.createElement('img');
+      img.src = event.target.result;
+      img.alt = 'User uploaded furry art';
+      galleryList.appendChild(img);
+      fileInput.value = ''; // Reset input
+    };
+    reader.readAsDataURL(file);
+  } else {
+    alert('Please select a valid image file.');
+  }
+});
+
+// Comments Logic
+const commentForm = document.getElementById('comment-form');
+const commentsList = document.getElementById('comments-list');
+
+commentForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const nameInput = document.getElementById('comment-name');
+  const commentInput = document.getElementById('comment-text');
+
+  const name = nameInput.value.trim();
+  const comment = commentInput.value.trim();
+
+  if (!name || !comment) return;
+
+  const commentDiv = document.createElement('div');
+  commentDiv.classList.add('comment');
+  commentDiv.innerHTML = `<strong>${escapeHTML(name)}</strong><p>${escapeHTML(comment)}</p>`;
+
+  commentsList.appendChild(commentDiv);
+
+  nameInput.value = '';
+  commentInput.value = '';
+});
+
+// Simple HTML escaping to avoid injection
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, function(match) {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[match];
+  });
+}
+</script>
+
+</body>
+</html>
